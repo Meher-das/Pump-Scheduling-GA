@@ -3,6 +3,7 @@
 import wntr
 from datetime import timedelta
 import config
+import numpy as np
 
 class SimulationManager:
 

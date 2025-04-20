@@ -2,13 +2,6 @@ import random
 from deap import base, creator
 from config import SWITCH_LIMITS
 
-def register_types():
-    try:
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", list, fitness=creator.FitnessMin)
-    except:
-        pass  # Already created
-
 def generate_pump_gene(time_steps):
     min_sw = SWITCH_LIMITS["min"]
     max_sw = SWITCH_LIMITS["max"]

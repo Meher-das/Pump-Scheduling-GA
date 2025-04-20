@@ -1,18 +1,22 @@
 from deap import algorithms, base, creator, tools
 import random
 import config
-from individual import generate_individual, register_types
-from fitness import dummy_fitness
+from individual import generate_individual
+from fitness import fitness
 from mutation import mutate_individual
 from crossover import uniform_crossover
 from utils import full_binary_matrix
 
-register_types()
+try:
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("Individual", list, fitness=creator.FitnessMin)
+except:
+    pass
 
 toolbox = base.Toolbox()
-toolbox.register("individual", tools.initIterate, creator.Individual, full_binary_matrix, generate_individual, config.TIME_STEPS, config.NUM_PUMPS)
+toolbox.register("individual", tools.initIterate, creator.Individual, lambda: generate_individual(config.TIME_STEPS, config.NUM_PUMPS))
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("evaluate", dummy_fitness)
+toolbox.register("evaluate", fitness)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", uniform_crossover)
 toolbox.register("mutate", mutate_individual)
@@ -37,3 +41,6 @@ def run_evolution(pop_size=10, generations=5, cxpb=0.7, mutpb=0.2):
     )
 
     return pop, log
+
+if __name__ == "__main__":
+    run_evolution()

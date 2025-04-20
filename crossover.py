@@ -41,37 +41,28 @@ def two_point_crossover(ind1, ind2, indcxpb=0.5):
     return child1, child2
 
 def uniform_crossover(ind1, ind2, indpb=0.5):
-    from copy import deepcopy
-    child1, child2 = deepcopy(ind1), deepcopy(ind2)
+    import random
 
-    for i in range(len(ind1)):  # for each pump
-        # Initial state swap
+    child1 = []
+    child2 = []
+
+    for gene1, gene2 in zip(ind1, ind2):
+        # gene1 and gene2 are tuples: (initial_state, switch_count, switch_positions)
+        init1, positions1 = gene1
+        init2, positions2 = gene2
+
+        # Swap each part with probability `indpb`
         if random.random() < indpb:
-            child1[i][0], child2[i][0] = child2[i][0], child1[i][0]
+            init1, init2 = init2, init1
+        if random.random() < indpb:
+            positions1, positions2 = positions2[:], positions1[:]  # deep copy to avoid shared refs
 
-        # Uniform crossover on padded switch positions
-        sw1 = child1[i][1]
-        sw2 = child2[i][1]
-
-        new_sw1, new_sw2 = [], []
-
-        for p1, p2 in zip(sw1, sw2):
-            if random.random() < indpb:
-                new_sw1.append(p2)
-                new_sw2.append(p1)
-            else:
-                new_sw1.append(p1)
-                new_sw2.append(p2)
-
-        # Clean up and pad
-        def clean_switches(switches):
-            cleaned = sorted(set(filter(lambda x: x != 0, switches)))
-            return cleaned[:MAX_SWITCHES] + [0] * (MAX_SWITCHES - len(cleaned))
-
-        child1[i][1] = clean_switches(new_sw1)
-        child2[i][1] = clean_switches(new_sw2)
+        # Append reconstructed tuples
+        child1.append((init1, positions1))
+        child2.append((init2, positions2))
 
     return child1, child2
+
 
 '''
 # Example individuals with 2 pumps each

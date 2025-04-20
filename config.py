@@ -21,4 +21,4 @@ HEAVY_PENALTY = 1e6
 TIME_STEPS = None
 NUM_PUMPS = None
 
-INP_FILE = ""  # <- You set this in main.py or test script
+INP_FILE = "Network Files/Net3.inp"  # <- You set this in main.py or test script

@@ -4,7 +4,7 @@ from simulation import SimulationManager
 import config
 
 def test_individual():
-    sim = SimulationManager("Network Files/Net3.inp")
+    sim = SimulationManager(config.INP_FILE)
 
     # Inject dynamically loaded config values
     config.TIME_STEPS = sim.time_steps

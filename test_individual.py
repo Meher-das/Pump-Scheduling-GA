@@ -7,8 +7,8 @@ def test_individual():
     sim = SimulationManager("Network Files/Net3.inp")
 
     # Inject dynamically loaded config values
-    config.TIME_STEPS = sim.TIME_STEPS
-    config.NUM_PUMPS = sim.NUM_PUMPS
+    config.TIME_STEPS = sim.time_steps
+    config.NUM_PUMPS = sim.num_pumps
 
     from individual import generate_individual
     from utils import decode_schedule, count_switches_per_pump

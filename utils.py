@@ -1,12 +1,5 @@
 # utils.py
 
-def calculate_costs(individual, wn):
-    # Placeholder calculations for:
-    # 1. Operation Cost
-    # 2. Switching Penalty
-    # 3. Demand Charge
-    return (1000.0, 100.0, 500.0)  # Dummy values
-
 def decode_schedule(pump_gene, time_steps):
     initial_state, padded_flips = pump_gene
     flip_positions = sorted([p for p in padded_flips if p > 0])  # ignore 0s

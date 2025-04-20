@@ -2,17 +2,19 @@
 
 import wntr
 from datetime import timedelta
-from utils import add_schedule, remove_schedule
+import config
 
 class SimulationManager:
 
     # Initialize
-    def __init__(self, inp_file_path):
+    def __init__(self, schedule, inp_file_path=config.INP_FILE):
+        self.schedule = schedule
         self.inp_file_path = inp_file_path
         self.wn = wntr.network.WaterNetworkModel(self.inp_file_path)
 
         self.num_pumps = self._get_num_pumps()
         self.time_steps = self._get_time_steps()
+        self.results = self.run_simulation(self.schedule)
 
     # Number of pumps 
     def _get_num_pumps(self):
@@ -47,12 +49,12 @@ class SimulationManager:
 
         # Run the simulation
         sim = wntr.sim.WNTRSimulator(self.wn)
-        self.results = sim.run_sim()
+        results = sim.run_sim()
 
         self.remove_schedule()        
         self.wn.reset_initial_values()
 
-        return self.results
+        return results
 
     # Volume constraint
     def volume_constraint(self):
@@ -66,9 +68,48 @@ class SimulationManager:
     def level_constraint(self):
         pass
 
-    # Objective function - 1
-    def objective_function_1(self):
-        pass
+    # Objective function - 1 : Pump Energy cost 
+    def objective_function_1(self, electricity_prices=[0.0244]*7+[0.1194]*15+[0.0244]*2, pump_efficiency=0.75):
+        """
+        Computes the total energy cost of running pumps over the simulation period.
+
+        Parameters:
+        - wn: WaterNetworkModel
+        - results: Simulation results from WNTR
+        - electricity_prices: List or array of electricity prices (length = time steps)
+        - pump_efficiency: Efficiency of pumps (0 < η ≤ 1)
+
+        Returns:
+        - float: total cost of pump operation
+        """
+        gamma = 9.81  # kN/m³
+        timestep = self.wn.options.time.hydraulic_timestep  # in seconds
+        duration_hr = timestep / 3600
+
+        total_cost = 0.0
+        num_price_steps = len(electricity_prices)
+
+        for pump_name in self.wn.pump_name_list:
+            curve_name = self.wn.get_link(pump_name).pump_curve_name
+            curve = self.wn.get_curve(curve_name)
+            points = np.array(curve.points)
+            flows = points[:, 0]
+            heads = points[:, 1]
+
+            pump_flows = self.results.link['flowrate'][pump_name].values
+
+            for t, flow in enumerate(pump_flows[:num_price_steps]):
+                if flow <= 0:
+                    continue
+
+                head = np.interp(flow, flows, heads)
+                power_kw = (gamma * flow * head) / (pump_efficiency)  # kW
+
+                cost = power_kw * duration_hr * electricity_prices[t]
+                total_cost += cost
+
+        return total_cost
+
 
     # Objective function - 2
     def objective_function_2(self):
@@ -78,7 +119,7 @@ class SimulationManager:
     def objective_function_3(self):
         pass
 
-'''
+
 # 🔧 Test block
 if __name__ == "__main__":
     import numpy as np
@@ -86,20 +127,15 @@ if __name__ == "__main__":
     # Replace with the actual path to your .inp file
     inp_file = "Network Files/Net3.inp"  # <-- Update this path
 
-    sim_mgr = SimulationManager(inp_file)
-
-    print(f"Num pumps: {sim_mgr.num_pumps}")
-    print(f"Time steps: {sim_mgr.time_steps}")
-
     dummy_schedule = [
-        [0, 1, 0, 1, 0, 1, 0, 1] * (sim_mgr.time_steps // 8),
-        [1, 0, 1, 0, 1, 0, 1, 0] * (sim_mgr.time_steps // 8)
+        [0, 1, 0, 1, 0, 1, 0, 1] * (24 // 8),
+        [1, 0, 1, 0, 1, 0, 1, 0] * (24 // 8)
     ]
 
-    print("Running test simulation with dummy schedule...")
-    results = sim_mgr.run_simulation(dummy_schedule)
-    print("Done")
+    sim_mgr = SimulationManager(dummy_schedule)
 
-    print("Results head (pressure):")
-    print(results.node['pressure'].head())
-'''
+    print(f"Num pumps: {2}")
+    print(f"Time steps: {24}")
+
+    print("Running test simulation with dummy schedule...")
+    print(sim_mgr.objective_function_1())

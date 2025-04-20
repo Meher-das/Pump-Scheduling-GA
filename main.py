@@ -1,14 +1,16 @@
 from deap import algorithms, base, creator, tools
 import random
+import config
 from individual import generate_individual, register_types
 from fitness import dummy_fitness
 from mutation import mutate_individual
 from crossover import uniform_crossover
+from utils import full_binary_matrix
 
 register_types()
 
 toolbox = base.Toolbox()
-toolbox.register("individual", tools.initIterate, creator.Individual, generate_individual)
+toolbox.register("individual", tools.initIterate, creator.Individual, full_binary_matrix, generate_individual, config.TIME_STEPS, config.NUM_PUMPS)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", dummy_fitness)
 toolbox.register("select", tools.selTournament, tournsize=3)

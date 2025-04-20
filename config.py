@@ -11,6 +11,17 @@ SWITCH_LIMITS = {
     "max": 5
 }
 
+# Define the tank head limits (min and max for each tank) 
+TANK_HEAD_LIMITS = {
+    "1": {"min": 6.5, "max": 9},
+    "2": {"min": 6.5, "max": 8.5},
+    "3": {"min": 6.0, "max": 9.0},
+    # Add more tanks as needed
+}
+
+MIN_NODE_PRESSURE = 5  # in meters
+MAX_NODE_PRESSURE = 10  # in meters
+
 # Penalty rate for each flip (if you want finer weighting)
 SWITCH_PENALTY_RATE = 1.0
 

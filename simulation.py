@@ -1,6 +1,7 @@
 # Pump-Scheduling-GA/simulation.py
 
 import wntr
+from datetime import timedelta
 
 class SimulationManager:
     def __init__(self, inp_file_path):
@@ -17,3 +18,5 @@ class SimulationManager:
         duration_hours = self.wn.options.time.duration / 3600  # duration in hours
         hydraulic_step_hours = self.wn.options.time.hydraulic_timestep / 3600
         return int(duration_hours / hydraulic_step_hours)
+
+    
